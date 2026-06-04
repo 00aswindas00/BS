@@ -13,6 +13,22 @@ export function WalletDropdown({ open, onClose }: WalletDropdownProps) {
       <nav className="py-2">
         {WALLET_MENU.map((item) => {
           const Icon = item.icon
+          if (item.external) {
+            return (
+              <a
+                key={item.path + item.label}
+                href={item.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onClose}
+                role="menuitem"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-text transition-colors hover:bg-sidebar-active"
+              >
+                <Icon size={18} className="shrink-0 text-muted" />
+                {item.label}
+              </a>
+            )
+          }
           return (
             <Link
               key={item.path + item.label}

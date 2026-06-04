@@ -42,6 +42,22 @@ export function ProfileDropdown({ open, onClose }: { open: boolean; onClose: () 
       <nav className="py-1">
         {PROFILE_MENU.map((item) => {
           const Icon = item.icon
+          if (item.external) {
+            return (
+              <a
+                key={item.path}
+                href={item.path}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onClose}
+                role="menuitem"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-text transition-colors hover:bg-sidebar-active"
+              >
+                <Icon size={18} className="text-muted" />
+                {item.label}
+              </a>
+            )
+          }
           return (
             <Link
               key={item.path}

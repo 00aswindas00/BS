@@ -27,6 +27,7 @@ type NavItem = {
   label: string
   icon: LucideIcon
   path?: string
+  externalHref?: string
   submenuKey?: SubmenuKey
 }
 
@@ -35,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Assets', icon: Wallet, submenuKey: 'assets' },
   { label: 'Orders', icon: ClipboardList, submenuKey: 'orders' },
   { label: 'Rewards Hub', icon: Gift, path: '/rewards' },
-  { label: 'Referral', icon: UserPlus, path: '/referral' },
+  { label: 'Referral', icon: UserPlus, externalHref: 'https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true' },
   { label: 'Account', icon: UserCircle, submenuKey: 'account' },
   { label: 'Sub Accounts', icon: GitBranch, path: '/sub-accounts' },
   { label: 'Settings', icon: Settings, path: '/settings' },
@@ -85,7 +86,17 @@ export function DashboardSidebar({ mobile = false }: { mobile?: boolean } = {}) 
 
           return (
             <div key={item.label}>
-              {item.path ? (
+              {item.externalHref ? (
+                <a
+                  href={item.externalHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted transition-colors hover:bg-sidebar-active hover:text-text"
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </a>
+              ) : item.path ? (
                 <Link
                   to={item.path}
                   className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${

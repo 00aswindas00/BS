@@ -28,6 +28,7 @@ export type HeaderNavLink = {
   label: string
   path: string
   icon: LucideIcon
+  external?: boolean
 }
 
 export const PROFILE_MENU: HeaderNavLink[] = [
@@ -35,7 +36,7 @@ export const PROFILE_MENU: HeaderNavLink[] = [
   { label: 'Assets', path: '/assets/overview', icon: Wallet },
   { label: 'Orders', path: '/orders/assets-history', icon: ClipboardList },
   { label: 'Account', path: '/account/identification', icon: UserCircle },
-  { label: 'Referral', path: '/referral', icon: UserPlus },
+  { label: 'Referral', path: 'https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true', icon: UserPlus, external: true },
   { label: 'Rewards Hub', path: '/rewards', icon: Gift },
   { label: 'Settings', path: '/settings', icon: Settings },
 ]
@@ -44,9 +45,9 @@ export const WALLET_MENU: HeaderNavLink[] = [
   { label: 'Overview', path: '/assets/overview', icon: LayoutGrid },
   { label: 'Spot', path: '/assets/spot', icon: CircleDot },
   { label: 'Margin', path: '/assets/margin', icon: ArrowLeftRight },
-  { label: 'Futures', path: '/assets/futures', icon: FileText },
-  { label: 'Options', path: '/assets/options', icon: SquareStack },
-  { label: 'Trading Bots', path: '/assets/trading-bots', icon: Bot },
+  { label: 'Futures', path: 'https://www.binance.com/en/trade/AI_USDT', icon: FileText, external: true },
+  { label: 'Options', path: 'https://www.binance.com/en/trade/AI_USDT', icon: SquareStack, external: true },
+  { label: 'Trading Bots', path: 'https://www.binance.com/en/trade/AI_USDT', icon: Bot, external: true },
   { label: 'Earn', path: '/assets/earn', icon: PiggyBank },
   { label: 'Funding', path: '/assets/funding', icon: Coins },
   { label: 'Asset History', path: '/orders/assets-history', icon: History },

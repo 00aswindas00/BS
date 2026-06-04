@@ -23,6 +23,8 @@ import { DepositCryptoPage } from './pages/DepositCryptoPage'
 import { WithdrawCryptoPage } from './pages/WithdrawCryptoPage'
 import { TransferFiatPlaceholderPage } from './pages/TransferFiatPlaceholderPage'
 import { SectionPlaceholderPage } from './pages/SectionPlaceholderPage'
+import { RewardsPage } from './pages/RewardsPage'
+import { SubAccountsPage } from './pages/SubAccountsPage'
 
 export default function App() {
   return (
@@ -53,9 +55,9 @@ export default function App() {
       <Route path="/account/reports" element={<FinancialReportsPage />} />
       <Route path="/account/:section" element={<SectionPlaceholderPage />} />
 
-      <Route path="/rewards" element={<SectionPlaceholderPage />} />
+      <Route path="/rewards" element={<RewardsPage />} />
       <Route path="/referral" element={<SectionPlaceholderPage />} />
-      <Route path="/sub-accounts" element={<SectionPlaceholderPage />} />
+      <Route path="/sub-accounts" element={<SubAccountsPage />} />
       <Route path="/settings" element={<SettingsPage />} />
 
       <Route path="/deposit/crypto" element={<DepositCryptoPage />} />
