@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-page: #0b0e11;
+  --color-card: #1e2329;
+  --color-card-border: #2b3139;
+  --color-input-border: #474d57;
+  --color-text: #eaecef;
+  --color-muted: #848e9c;
+  --color-accent: #fcd535;
+  --color-accent-hover: #f0b90b;
+  --color-input-hover: #5e6673;
+  --color-error: #f6465d;
+  --color-success: #0ecb81;
+  --color-sidebar-active: #2b3139;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-family: var(--font-sans);
+    background-color: var(--color-page);
+    color: var(--color-text);
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  /* PWA standalone mode – account for safe area insets (notch, etc.) */
+  @media (display-mode: standalone) {
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+  /* Prevent pull-to-refresh and overscroll in PWA mode */
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  input {
+    font-family: inherit;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+@layer utilities {
+  .shake {
+    animation: shake 0.4s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .spinner {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

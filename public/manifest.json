@@ -1,0 +1,33 @@
+{
+  "name": "Binance",
+  "short_name": "Binance",
+  "description": "Cryptocurrency Exchange",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0b0e11",
+  "background_color": "#0b0e11",
+  "categories": ["finance", "business"],
+  "icons": [
+    {
+      "src": "/applogo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/applogo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/applogo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
