@@ -17,12 +17,12 @@ export function DashboardLayout({
   showBanner = true,
 }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-page">
+    <div className="min-h-screen bg-page">
       {showBanner && <NotificationBanner />}
       <DashboardHeader />
       <div className="flex">
         <DashboardSidebar />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-x-hidden">
           <div className="mx-auto max-w-[1280px] px-3 py-4 sm:px-6 sm:py-5 lg:px-8">{children}</div>
           {footer === 'wallet' ? <WalletFooter /> : <DashboardFooter />}
         </div>
