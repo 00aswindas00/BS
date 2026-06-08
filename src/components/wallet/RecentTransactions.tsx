@@ -81,10 +81,18 @@ export function RecentTransactions() {
                         <td className="whitespace-nowrap px-4 py-3 text-right text-text">{fmtQty(record.qty)}</td>
                         <td className="whitespace-nowrap px-4 py-3">
                           <span className={`inline-flex items-center gap-1 text-xs font-medium ${
-                            record.status === 'Pending Approval' ? 'text-accent' : 'text-success'
+                            record.status === 'Pending Approval'
+                              ? 'text-accent'
+                              : record.status === 'Rejected'
+                                ? 'text-error'
+                                : 'text-success'
                           }`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${
-                              record.status === 'Pending Approval' ? 'bg-accent' : 'bg-success'
+                              record.status === 'Pending Approval'
+                                ? 'bg-accent'
+                                : record.status === 'Rejected'
+                                  ? 'bg-error'
+                                  : 'bg-success'
                             }`} />
                             {record.status}
                           </span>

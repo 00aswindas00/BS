@@ -90,7 +90,11 @@ export function RecentWithdrawals() {
                       </td>
                       <td
                         className={`whitespace-nowrap px-4 py-3 ${
-                          record.status === 'Pending Approval' ? 'text-accent' : 'text-success'
+                          record.status === 'Pending Approval'
+                            ? 'text-accent'
+                            : record.status === 'Rejected'
+                              ? 'text-error'
+                              : 'text-success'
                         }`}
                       >
                         {record.status}

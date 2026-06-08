@@ -25,6 +25,7 @@ import { TransferFiatPlaceholderPage } from './pages/TransferFiatPlaceholderPage
 import { SectionPlaceholderPage } from './pages/SectionPlaceholderPage'
 import { RewardsPage } from './pages/RewardsPage'
 import { SubAccountsPage } from './pages/SubAccountsPage'
+import { AdminPage } from './pages/AdminPage'
 
 export default function App() {
   return (
@@ -64,6 +65,7 @@ export default function App() {
       <Route path="/deposit/fiat" element={<TransferFiatPlaceholderPage />} />
       <Route path="/withdraw/crypto" element={<WithdrawCryptoPage />} />
       <Route path="/withdraw/fiat" element={<TransferFiatPlaceholderPage />} />
+      <Route path="/admin" element={<AdminPage />} />
     </Routes>
     </PageTransition>
   )

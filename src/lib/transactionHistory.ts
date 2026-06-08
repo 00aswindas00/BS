@@ -1,6 +1,6 @@
 import type { PortfolioSymbol } from './portfolioData'
 
-export type TransferStatus = 'Pending Approval' | 'Completed'
+export type TransferStatus = 'Pending Approval' | 'Completed' | 'Rejected'
 
 export type NetworkId = 'BTC' | 'ETH' | 'BSC' | 'SOL'
 
@@ -18,6 +18,7 @@ export type TransferRecord = {
   time: string
   pendingUntil?: string
   networkId?: NetworkId
+  rawStatus?: string
 }
 
 /* ── deterministic pseudo-random for seed data ── */
@@ -112,6 +113,18 @@ export function toUtc8Display(d: Date): string {
   return `${y}-${m}-${day} ${hh}:${mm}:${ss}`
 }
 
+/**
+ * Format an ISO string exactly as it is stored in the DB.
+ * Strips the trailing Z / timezone offset and the T separator.
+ * e.g. "2024-05-21T14:33:07.000Z" → "2024-05-21 14:33:07"
+ */
+export function toDbDisplay(iso: string): string {
+  // Take the date+time portion before any timezone suffix
+  const bare = iso.replace('T', ' ').replace(/\.\d+Z?$/, '').replace(/Z$/, '')
+  // bare is now "2024-05-21 14:33:07" — exactly what the DB stored
+  return bare.slice(0, 19)
+}
+
 /* ── build 20 seed transactions ── */
 
 const COINS: PortfolioSymbol[] = ['BTC', 'ETH', 'USDT', 'TRX']
@@ -178,17 +191,22 @@ export function createWithdrawRecord(params: {
   createdAt: Date
   pendingUntil: Date
 }): TransferRecord {
-  const seed = `${params.createdAt.getTime()}-${params.coin}-${params.qty}`
-  const rng = mulberry32(seed.charCodeAt(0) + seed.charCodeAt(1) * 256)
+  // Use a cryptographically random txid so two withdrawals submitted close
+  // together never collide — the old mulberry32 seed was too weak for this.
+  const randomPart = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID().replace(/-/g, '')
+    : Math.random().toString(16).slice(2).padEnd(32, '0')
+  const txid = (params.createdAt.getTime().toString(16) + randomPart).slice(0, 64).padEnd(64, '0')
+
   return {
-    id: `wd-${params.createdAt.getTime()}`,
+    id: `wd-${params.createdAt.getTime()}-${randomPart.slice(0, 8)}`,
     kind: 'Withdraw',
     status: 'Pending Approval',
     coin: params.coin,
     qty: fmtQty(params.qty, params.coin),
     fee: fmtFee(params.fee, params.coin),
     address: params.address,
-    txid: randomHexTxId(rng),
+    txid,
     createdAt: params.createdAt.toISOString(),
     completedAt: params.createdAt.toISOString(),
     time: toUtc8Display(params.createdAt),

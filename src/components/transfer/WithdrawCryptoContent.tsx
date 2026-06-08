@@ -8,9 +8,9 @@ import {
 import type { PortfolioSymbol } from '../../lib/portfolioData'
 import { usePortfolioStore } from '../../hooks/usePortfolioStore'
 import {
-  isValidTronAddress,
+  getNetworksForCoin,
+  isValidAddress,
   MIN_WITHDRAW,
-  TRANSFER_NETWORKS,
   WITHDRAW_FEE_RATE,
 } from '../../lib/transferConstants'
 import { formatCoinAmount } from '../../hooks/usePortfolioMarketData'
@@ -32,9 +32,19 @@ export function WithdrawCryptoContent() {
   const selectedAsset = coins.find((c) => c.symbol === selectedCoin)
   const available = selectedAsset?.amount ?? 0
 
-  const step1Done = selectedCoin !== null && coins.some((c) => c.symbol === selectedCoin)
-  const addressValid = addressTab === 'address' && isValidTronAddress(withdrawAddress)
-  const step2Done = step1Done && selectedNetworkId === 'TRX' && addressValid
+  // Networks available for the selected coin
+  const availableNetworks = getNetworksForCoin(selectedCoin)
+  const selectedNetwork = availableNetworks.find((n) => n.id === selectedNetworkId) ?? null
+
+  const step1Done = coins.some((c) => c.symbol === selectedCoin)
+
+  // Address validation uses the selected network's specific regex
+  const addressValid =
+    addressTab === 'address' &&
+    selectedNetworkId !== null &&
+    isValidAddress(withdrawAddress, selectedNetworkId, selectedCoin)
+
+  const step2Done = step1Done && selectedNetworkId !== null && addressValid
 
   const amountNum = parseFloat(amount) || 0
   const fee = amountNum * WITHDRAW_FEE_RATE
@@ -43,16 +53,14 @@ export function WithdrawCryptoContent() {
 
   const amountError =
     amountNum > 0 && amountNum < minWithdraw
-      ? `Amount to withdraw must be at least ${minWithdraw}`
+      ? `Minimum withdrawal is ${minWithdraw} ${selectedCoin}`
       : amountNum > available
         ? 'Amount exceeds available balance'
         : receive <= 0 && amountNum > 0
-          ? 'Amount is too small after network fee'
+          ? 'Amount too small after network fee'
           : null
 
-  const canWithdraw =
-    step2Done && amountNum > 0 && !amountError && !submitted
-
+  const canWithdraw = step2Done && amountNum > 0 && !amountError && !submitted
   const step3Enabled = step2Done
 
   function handleWithdraw() {
@@ -70,10 +78,9 @@ export function WithdrawCryptoContent() {
     }
   }
 
-  const selectedNetwork = TRANSFER_NETWORKS.find((n) => n.id === selectedNetworkId)
-
   return (
     <div>
+      {/* ── Step 1: Select coin ── */}
       <StepHeader step={1} title="Select coin">
         <button
           type="button"
@@ -102,6 +109,7 @@ export function WithdrawCryptoContent() {
                 onClick={() => {
                   setSelectedCoin(asset.symbol)
                   setSelectedNetworkId(null)
+                  setWithdrawAddress('')
                   setAmount('')
                   setSubmitted(false)
                   setCoinOpen(false)
@@ -109,9 +117,7 @@ export function WithdrawCryptoContent() {
                 className="flex w-full items-center gap-3 px-4 py-2.5 hover:bg-sidebar-active"
               >
                 <CoinLogo symbol={asset.symbol} size={24} iconBg={asset.iconBg} />
-                <span className="text-text">
-                  {asset.symbol} {asset.name}
-                </span>
+                <span className="text-text">{asset.symbol} {asset.name}</span>
                 <span className="ml-auto text-xs text-muted">
                   {formatCoinAmount(asset.amount, asset.symbol)}
                 </span>
@@ -121,7 +127,9 @@ export function WithdrawCryptoContent() {
         )}
       </StepHeader>
 
+      {/* ── Step 2: Withdraw to (address + network) ── */}
       <StepHeader step={2} title="Withdraw to" enabled={step1Done}>
+        {/* Address / User tab */}
         <div className="mb-4 flex gap-6 border-b border-card-border">
           {(['address', 'user'] as const).map((tab) => (
             <button
@@ -139,6 +147,8 @@ export function WithdrawCryptoContent() {
             </button>
           ))}
         </div>
+
+        {/* Address input */}
         <div
           className={`mb-3 flex max-w-xl items-center gap-2 rounded-md border bg-card px-3 py-2.5 ${
             withdrawAddress && !addressValid ? 'border-error' : 'border-input-border'
@@ -151,16 +161,22 @@ export function WithdrawCryptoContent() {
               setWithdrawAddress(e.target.value)
               setSubmitted(false)
             }}
-            placeholder="Enter TRON (TRC20) address"
+            placeholder={
+              selectedNetwork?.addressHint ?? 'Select a network first'
+            }
             className="min-w-0 flex-1 bg-transparent text-sm text-accent outline-none placeholder:text-muted"
           />
           <button type="button" className="text-muted hover:text-text" aria-label="Address book">
             <BookUser size={20} />
           </button>
         </div>
-        {withdrawAddress && !addressValid && (
-          <p className="mb-2 text-sm text-error">Enter a valid TRON address (starts with T, 34 chars).</p>
+        {withdrawAddress && selectedNetworkId && !addressValid && (
+          <p className="mb-2 text-sm text-error">
+            {selectedNetwork?.addressFormatNote ?? 'Invalid address format.'}
+          </p>
         )}
+
+        {/* Network selector */}
         <button
           type="button"
           onClick={() => step1Done && setNetworkOpen((v) => !v)}
@@ -170,43 +186,39 @@ export function WithdrawCryptoContent() {
           <span className="text-text">{selectedNetwork?.label ?? 'Select network'}</span>
           <ChevronDown size={18} className="text-muted" />
         </button>
+
         {networkOpen && step1Done && (
           <div className="mb-2 max-w-xl rounded-md border border-card-border bg-card py-1 shadow-lg">
-            {TRANSFER_NETWORKS.map((network) => (
-              <button
-                key={network.id}
-                type="button"
-                disabled={!network.selectable}
-                onClick={() => {
-                  if (!network.selectable) return
-                  setSelectedNetworkId(network.id)
-                  setNetworkOpen(false)
-                }}
-                className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm ${
-                  network.selectable
-                    ? 'text-text hover:bg-sidebar-active'
-                    : 'cursor-not-allowed text-muted/50'
-                }`}
-              >
-                <span>{network.label}</span>
-                {!network.selectable && <span className="text-xs">Unavailable</span>}
-              </button>
-            ))}
+            {availableNetworks.length === 0 ? (
+              <p className="px-4 py-3 text-sm text-muted">No networks available for this coin.</p>
+            ) : (
+              availableNetworks.map((network) => (
+                <button
+                  key={network.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedNetworkId(network.id)
+                    setWithdrawAddress('')
+                    setSubmitted(false)
+                    setNetworkOpen(false)
+                  }}
+                  className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm text-text hover:bg-sidebar-active"
+                >
+                  <span>{network.label}</span>
+                </button>
+              ))
+            )}
           </div>
         )}
+
         {selectedNetwork && (
-          <>
-            <p className="text-sm text-muted">
-              Contract address ending in <span className="text-text">{selectedNetwork.contractSuffix}</span>
-              <ChevronRight size={14} className="inline" />
-            </p>
-            <p className="mt-1 text-sm text-muted">
-              Please note that TRON addresses are case sensitive.
-            </p>
-          </>
+          <p className="mt-1 text-sm text-muted">
+            {selectedNetwork.addressHint}
+          </p>
         )}
       </StepHeader>
 
+      {/* ── Step 3: Amount ── */}
       <StepHeader step={3} title="Withdraw amount" isLast enabled={step3Enabled}>
         <div
           className={`mb-2 flex max-w-xl items-center rounded-md border bg-card px-3 ${
@@ -236,16 +248,17 @@ export function WithdrawCryptoContent() {
         {amountError && <p className="mb-3 text-sm text-error">{amountError}</p>}
         {submitted && (
           <p className="mb-3 text-sm text-accent">
-            Withdrawal submitted. Status: Pending Approval (up to 5 minutes).
+            Withdrawal submitted — status: Pending Approval.
           </p>
         )}
+
         <p className="mb-4 max-w-xl text-sm leading-relaxed text-muted">
-          Network fee is {WITHDRAW_FEE_RATE * 100}% of the withdrawal amount. Recipient receives the
-          remainder.
+          Network fee is {WITHDRAW_FEE_RATE * 100}% of the withdrawal amount. Recipient receives the remainder.
         </p>
+
         <div className="mb-4 space-y-1 text-sm">
           <p className="text-muted">
-            Available Withdraw:{' '}
+            Available:{' '}
             <span className="text-text">
               {formatCoinAmount(available, selectedCoin)} {selectedCoin}
             </span>
@@ -257,6 +270,7 @@ export function WithdrawCryptoContent() {
             </span>
           </p>
         </div>
+
         <div className="mb-6 max-w-xl">
           <div className="mb-2 flex items-center gap-2 text-sm text-muted">
             <ArrowLeftRight size={14} />
@@ -270,6 +284,7 @@ export function WithdrawCryptoContent() {
             <ChevronRight size={14} className="inline" />
           </button>
         </div>
+
         <button
           type="button"
           disabled={!canWithdraw}

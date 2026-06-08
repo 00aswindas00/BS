@@ -1,6 +1,4 @@
-import { DEPOSIT_ADDRESS } from '../../lib/transferConstants'
-
-export function DepositQrCode({ address = DEPOSIT_ADDRESS }: { address?: string }) {
+export function DepositQrCode({ address }: { address: string }) {
   const src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(address)}`
 
   return (

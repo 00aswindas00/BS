@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { Download, ChevronDown, ChevronLeft, ChevronRight, Copy } from 'lucide-react'
 import { EmptyTableState } from '../shared/EmptyTableState'
 import { usePortfolioStore } from '../../hooks/usePortfolioStore'
@@ -133,9 +133,8 @@ export function AssetsHistoryContent() {
                 {paginatedRecords.map((record) => {
                   const isExpanded = expandedId === record.id
                   return (
-                    <>
+                    <Fragment key={record.id}>
                       <tr
-                        key={record.id}
                         className="cursor-pointer border-b border-card-border last:border-b-0 transition-colors hover:bg-sidebar-active/30"
                         onClick={() => setExpandedId(isExpanded ? null : record.id)}
                       >
@@ -159,10 +158,18 @@ export function AssetsHistoryContent() {
                         </td>
                         <td className="whitespace-nowrap px-4 py-3">
                           <span className={`inline-flex items-center gap-1 text-xs font-medium ${
-                            record.status === 'Pending Approval' ? 'text-accent' : 'text-success'
+                            record.status === 'Pending Approval'
+                              ? 'text-accent'
+                              : record.status === 'Rejected'
+                                ? 'text-error'
+                                : 'text-success'
                           }`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${
-                              record.status === 'Pending Approval' ? 'bg-accent' : 'bg-success'
+                              record.status === 'Pending Approval'
+                                ? 'bg-accent'
+                                : record.status === 'Rejected'
+                                  ? 'bg-error'
+                                  : 'bg-success'
                             }`} />
                             {record.status}
                           </span>
@@ -191,7 +198,7 @@ export function AssetsHistoryContent() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   )
                 })}
               </tbody>

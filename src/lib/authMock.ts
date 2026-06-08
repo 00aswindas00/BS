@@ -1,4 +1,4 @@
-import { fetchAndApplyTronBalances } from './tronBalance'
+import { clearSessionCache, initialSync } from './portfolioStore'
 
 export type SocialProvider = 'passkey' | 'google' | 'apple' | 'telegram'
 
@@ -48,8 +48,10 @@ export async function verifyPassword(email: string, password: string): Promise<v
     }),
   )
 
-  // Fire-and-forget: fetch on-chain balances after successful login
-  fetchAndApplyTronBalances()
+  // Clear any stale session cache so the fresh login fetches from DB
+  clearSessionCache()
+  // Fire-and-forget: load balances + transactions from DB
+  void initialSync()
 }
 
 export async function socialLogin(provider: SocialProvider): Promise<void> {
@@ -64,8 +66,8 @@ export async function socialLogin(provider: SocialProvider): Promise<void> {
     }),
   )
 
-  // Fire-and-forget: fetch on-chain balances after successful login
-  fetchAndApplyTronBalances()
+  clearSessionCache()
+  void initialSync()
 }
 
 export function getAuthSession(): {
@@ -88,4 +90,5 @@ export function getAuthSession(): {
 
 export function clearAuthSession(): void {
   sessionStorage.removeItem('bclone_auth')
+  clearSessionCache()
 }

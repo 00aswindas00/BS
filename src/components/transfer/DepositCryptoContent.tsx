@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { ChevronDown, Copy, ChevronRight } from 'lucide-react'
+import { ChevronDown, Copy } from 'lucide-react'
 import type { PortfolioSymbol } from '../../lib/portfolioData'
 import { usePortfolioStore } from '../../hooks/usePortfolioStore'
-import { DEPOSIT_ADDRESS, TRANSFER_NETWORKS } from '../../lib/transferConstants'
+import { getNetworksForCoin } from '../../lib/transferConstants'
 import { formatCoinAmount } from '../../hooks/usePortfolioMarketData'
 import { DepositQrCode } from './DepositQrCode'
 import { StepHeader } from './StepHeader'
@@ -14,15 +14,30 @@ export function DepositCryptoContent() {
   const [networkOpen, setNetworkOpen] = useState(false)
   const [selectedCoin, setSelectedCoin] = useState<PortfolioSymbol | null>(null)
   const [selectedNetworkId, setSelectedNetworkId] = useState<string | null>(null)
-
-  const step2Enabled = selectedCoin !== null
-  const step3Enabled = step2Enabled && selectedNetworkId === 'TRX'
+  const [copied, setCopied] = useState(false)
 
   const selectedAsset = coins.find((c) => c.symbol === selectedCoin)
-  const selectedNetwork = TRANSFER_NETWORKS.find((n) => n.id === selectedNetworkId)
+
+  // Networks available for the selected coin
+  const availableNetworks = selectedCoin ? getNetworksForCoin(selectedCoin) : []
+  const selectedNetwork = availableNetworks.find((n) => n.id === selectedNetworkId) ?? null
+
+  const step2Enabled = selectedCoin !== null
+  const step3Enabled = selectedNetwork !== null
+
+  const depositAddress = selectedNetwork?.depositAddress ?? ''
+
+  function handleCopy() {
+    if (!depositAddress) return
+    navigator.clipboard.writeText(depositAddress).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   return (
     <div>
+      {/* ── Step 1: Select coin ── */}
       <StepHeader step={1} title="Select Coin">
         <button
           type="button"
@@ -45,10 +60,11 @@ export function DepositCryptoContent() {
           )}
           <ChevronDown size={18} className="text-muted" />
         </button>
+
         {coinOpen && (
           <div className="mt-1 max-w-xl rounded-md border border-card-border bg-card py-1 shadow-lg">
             {coins.length === 0 ? (
-              <p className="px-4 py-3 text-sm text-muted">No tokens with balance in your account.</p>
+              <p className="px-4 py-3 text-sm text-muted">No tokens in your account.</p>
             ) : (
               coins.map((asset) => (
                 <button
@@ -76,6 +92,7 @@ export function DepositCryptoContent() {
         )}
       </StepHeader>
 
+      {/* ── Step 2: Select Network ── */}
       <StepHeader step={2} title="Select Network" enabled={step2Enabled}>
         <button
           type="button"
@@ -88,78 +105,63 @@ export function DepositCryptoContent() {
           </span>
           <ChevronDown size={18} className="text-muted" />
         </button>
+
         {networkOpen && step2Enabled && (
           <div className="mb-2 max-w-xl rounded-md border border-card-border bg-card py-1 shadow-lg">
-            {TRANSFER_NETWORKS.map((network) => (
-              <button
-                key={network.id}
-                type="button"
-                disabled={!network.selectable}
-                onClick={() => {
-                  if (!network.selectable) return
-                  setSelectedNetworkId(network.id)
-                  setNetworkOpen(false)
-                }}
-                className={`flex w-full items-center justify-between px-4 py-2.5 text-left text-sm ${
-                  network.selectable
-                    ? 'text-text hover:bg-sidebar-active'
-                    : 'cursor-not-allowed text-muted/50'
-                }`}
-              >
-                <span>{network.label}</span>
-                {!network.selectable && (
-                  <span className="text-xs text-muted">Unavailable</span>
-                )}
-              </button>
-            ))}
+            {availableNetworks.length === 0 ? (
+              <p className="px-4 py-3 text-sm text-muted">No networks available.</p>
+            ) : (
+              availableNetworks.map((network) => (
+                <button
+                  key={network.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedNetworkId(network.id)
+                    setNetworkOpen(false)
+                  }}
+                  className="flex w-full items-center px-4 py-2.5 text-left text-sm text-text hover:bg-sidebar-active"
+                >
+                  {network.label}
+                </button>
+              ))
+            )}
           </div>
-        )}
-        {selectedNetwork && (
-          <p className="text-sm text-muted">
-            Contract address ending in{' '}
-            <button type="button" className="text-text hover:text-accent">
-              {selectedNetwork.contractSuffix}
-            </button>
-            <ChevronRight size={14} className="inline" />
-          </p>
         )}
       </StepHeader>
 
+      {/* ── Step 3: Deposit address ── */}
       <StepHeader step={3} title="Deposit Address" isLast enabled={step3Enabled}>
         <div className="max-w-xl rounded-lg border border-card-border bg-card p-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <DepositQrCode address={DEPOSIT_ADDRESS} />
+            <DepositQrCode address={depositAddress} />
             <div className="min-w-0 flex-1">
+              <p className="mb-1 text-sm text-muted">Network</p>
+              <p className="mb-3 text-sm font-medium text-text">{selectedNetwork?.label}</p>
               <p className="mb-2 text-sm text-muted">Address</p>
               <div className="flex items-start gap-2">
-                <p className="break-all text-sm font-medium text-accent">{DEPOSIT_ADDRESS}</p>
+                <p className="break-all text-sm font-medium text-accent">{depositAddress}</p>
                 <button
                   type="button"
-                  className="shrink-0 text-muted hover:text-text"
+                  className="shrink-0 text-muted transition-colors hover:text-text"
                   aria-label="Copy address"
-                  onClick={() => navigator.clipboard.writeText(DEPOSIT_ADDRESS)}
+                  onClick={handleCopy}
                 >
                   <Copy size={18} />
                 </button>
               </div>
+              {copied && (
+                <p className="mt-1 text-xs text-success">Address copied!</p>
+              )}
             </div>
           </div>
         </div>
-        <div className="mt-3 flex max-w-xl justify-between text-sm">
-          <span className="text-muted">Minimum deposit</span>
-          <span className="text-text">
-            More than 0.01 {selectedCoin ?? 'USDT'}
-          </span>
+
+        <div className="mt-4 max-w-xl space-y-1 rounded-md border border-card-border bg-card/50 px-4 py-3 text-sm text-muted">
+          <p>• Only send <span className="text-text font-medium">{selectedCoin}</span> on the <span className="text-text font-medium">{selectedNetwork?.label}</span> network to this address.</p>
+          <p>• Sending the wrong coin or network may result in permanent loss.</p>
+          <p>• Minimum deposit: more than 0 {selectedCoin}</p>
         </div>
-        <button
-          type="button"
-          className="mt-2 flex items-center gap-1 text-sm text-muted hover:text-text"
-        >
-          More Details
-          <ChevronDown size={16} />
-        </button>
       </StepHeader>
     </div>
   )
 }
-
