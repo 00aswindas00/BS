@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient'
 import type { PortfolioSymbol } from './portfolioData'
 import type { TransferRecord } from './transactionHistory'
-import { toUtc8Display, toDbDisplay } from './transactionHistory'
+import { toDbDisplay } from './transactionHistory'
 
 const CURRENT_USER_EMAIL = 'sunilkryptousdt@gmail.com'
 
