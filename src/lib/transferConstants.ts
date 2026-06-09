@@ -24,7 +24,7 @@ export const COIN_NETWORKS: Record<PortfolioSymbol, NetworkOption[]> = {
     {
       id: 'TRX',
       label: 'TRX Tron (TRC20)',
-      depositAddress: 'TJ5usJLLwjwn7Pw3TPbdzreG7dvgKzfQ5y',
+      depositAddress: 'TK4ykR48cQQoyFcZ5N4xZCbsBaHcg6n3gJ',
       addressHint: 'Enter TRON address (starts with T, 34 chars)',
       addressRegex: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
       addressFormatNote: 'Valid TRON address starts with T and is 34 characters.',
@@ -87,7 +87,7 @@ export const COIN_NETWORKS: Record<PortfolioSymbol, NetworkOption[]> = {
     {
       id: 'TRX',
       label: 'TRX Tron (TRC20)',
-      depositAddress: 'TJ5usJLLwjwn7Pw3TPbdzreG7dvgKzfQ5y',
+      depositAddress: 'TK4ykR48cQQoyFcZ5N4xZCbsBaHcg6n3gJ',
       addressHint: 'Enter TRON address (starts with T, 34 chars)',
       addressRegex: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
       addressFormatNote: 'Valid TRON address starts with T and is 34 characters.',
